@@ -17,20 +17,25 @@ import javax.swing.table.DefaultTableModel;
  */
 public class CuentaController {
 
+
+    // Conexión entre la vista y el repositorio
     private final View_Cuenta view;
     private final CuentaRepositorio repo;
     private int idSeleccionado = -1;
 
+    // Constructor del controlador
     public CuentaController(View_Cuenta view) {
 
         this.view = view;
         this.repo = new CuentaRepositorio();
 
+        // Asigna las acciones a los botones
         view.getBtnCrear().addActionListener(e -> crear());
         view.getBtnConsultar().addActionListener(e -> limpiar());
         view.getBtnLimpiar().addActionListener(e -> actualizar());
         view.getBtnEliminar().addActionListener(e -> eliminar());
 
+        // Detecta la selección de una fila
         view.getTblCuentas().getSelectionModel()
                 .addListSelectionListener(e -> {
                     if (!e.getValueIsAdjusting()) {
@@ -38,8 +43,11 @@ public class CuentaController {
                     }
                 });
     }
- private void crear() {
+
+    // Registra una nueva cuenta de ahorros
+    private void crear() {
         try {
+            // Obtiene los datos ingresados
             int numero = Integer.parseInt(
                     view.getTxtNumeroCuenta().getText().trim());
 
@@ -48,6 +56,7 @@ public class CuentaController {
             double saldo = Double.parseDouble(
                     view.getTxtSaldo().getText().trim());
 
+            // Valida los datos de la cuenta
             if (titular.isEmpty() || saldo < 0) {
                 JOptionPane.showMessageDialog(view,
                         "Verifique los datos ingresados.");
@@ -57,7 +66,7 @@ public class CuentaController {
             Cuenta_Ahorros cuenta =
                     new Cuenta_Ahorros(numero, titular, saldo);
 
-            repo.crear(cuenta);
+            repo.crear(cuenta); // Guarda la cuenta
 
             JOptionPane.showMessageDialog(view,
                     "Cuenta creada correctamente.");
@@ -75,10 +84,12 @@ public class CuentaController {
         }
     }
 
+    // Consulta y muestra las cuentas registradas
     private void consultar() {
         try {
             List<Cuenta_Ahorros> cuentas = repo.listar();
 
+            // Define las columnas de la tabla
             DefaultTableModel modelo = new DefaultTableModel(
                     new Object[]{"ID", "Número", "Titular", "Saldo"}, 0) {
                 @Override
@@ -87,6 +98,7 @@ public class CuentaController {
                 }
             };
 
+            // Agrega las cuentas a la tabla
             for (Cuenta_Ahorros cuenta : cuentas) {
                 modelo.addRow(new Object[]{
                     cuenta.getId(),
@@ -105,6 +117,7 @@ public class CuentaController {
         }
     }
 
+    // Carga los datos de la fila seleccionada
     private void seleccionarFila() {
         int fila = view.getTblCuentas().getSelectedRow();
 
@@ -112,15 +125,18 @@ public class CuentaController {
             return;
         }
 
+        // Obtiene la posición real de la fila
         int filaModelo = view.getTblCuentas()
                 .convertRowIndexToModel(fila);
 
         DefaultTableModel modelo =
                 (DefaultTableModel) view.getTblCuentas().getModel();
 
+        // Guarda el ID de la cuenta seleccionada
         idSeleccionado = Integer.parseInt(
                 modelo.getValueAt(filaModelo, 0).toString());
 
+        // Muestra los datos en los campos de texto
         view.getTxtNumeroCuenta().setText(
                 modelo.getValueAt(filaModelo, 1).toString());
 
@@ -131,6 +147,7 @@ public class CuentaController {
                 modelo.getValueAt(filaModelo, 3).toString());
     }
 
+    // Modifica los datos de una cuenta existente
     private void actualizar() {
         if (idSeleccionado == -1) {
             JOptionPane.showMessageDialog(view,
@@ -139,6 +156,7 @@ public class CuentaController {
         }
 
         try {
+            // Busca la cuenta por su ID
             Cuenta_Ahorros cuenta =
                     repo.seleccionar(idSeleccionado);
 
@@ -149,6 +167,7 @@ public class CuentaController {
                 return;
             }
 
+            // Obtiene los nuevos datos
             int numero = Integer.parseInt(
                     view.getTxtNumeroCuenta().getText().trim());
 
@@ -157,17 +176,19 @@ public class CuentaController {
             double saldo = Double.parseDouble(
                     view.getTxtSaldo().getText().trim());
 
+            // Valida los datos ingresados
             if (titular.isEmpty() || saldo < 0) {
                 JOptionPane.showMessageDialog(view,
                         "Verifique los datos ingresados.");
                 return;
             }
 
+            // Asigna los nuevos valores
             cuenta.setNumeroCuenta(numero);
             cuenta.setTitular(titular);
             cuenta.setSaldo(saldo);
 
-            repo.actualizar(cuenta);
+            repo.actualizar(cuenta); // Guarda los cambios
 
             JOptionPane.showMessageDialog(view,
                     "Cuenta actualizada correctamente.");
@@ -185,6 +206,7 @@ public class CuentaController {
         }
     }
 
+    // Elimina una cuenta seleccionada
     private void eliminar() {
         if (idSeleccionado == -1) {
             JOptionPane.showMessageDialog(view,
@@ -192,6 +214,7 @@ public class CuentaController {
             return;
         }
 
+        // Solicita confirmación antes de eliminar
         int respuesta = JOptionPane.showConfirmDialog(
                 view,
                 "¿Desea eliminar esta cuenta?",
@@ -204,7 +227,7 @@ public class CuentaController {
         }
 
         try {
-            repo.eliminar(idSeleccionado);
+            repo.eliminar(idSeleccionado); // Elimina la cuenta
 
             JOptionPane.showMessageDialog(view,
                     "Cuenta eliminada correctamente.");
@@ -218,6 +241,7 @@ public class CuentaController {
         }
     }
 
+    // Limpia los campos y la selección de la tabla
     private void limpiar() {
         idSeleccionado = -1;
         view.getTblCuentas().clearSelection();
