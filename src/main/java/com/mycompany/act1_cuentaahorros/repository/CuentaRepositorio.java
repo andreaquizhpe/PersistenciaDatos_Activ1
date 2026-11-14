@@ -9,6 +9,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import java.util.List;
+import com.mycompany.act1_cuentaahorros.entity.Movimiento;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -17,7 +19,6 @@ import java.util.List;
 //CREcion del repositorio para el uso de los metodos
 public class CuentaRepositorio {
 
-   
     // Configura la conexión con la base de datos
     private final EntityManagerFactory emf
             = Persistence.createEntityManagerFactory(
@@ -127,4 +128,104 @@ public class CuentaRepositorio {
         }
     }
 
+    public List<Cuenta_Ahorros> buscarPorSucursalYSaldo(
+            String nombreSucursal, double saldoMinimo) {
+
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            return em.createQuery(
+                    "SELECT c FROM Cuenta_Ahorros c "
+                    + "JOIN FETCH c.sucursal s "
+                    + "WHERE s.nombre = :nombreSucursal "
+                    + "AND c.saldo >= :saldoMinimo "
+                    + "ORDER BY c.saldo ASC, c.id ASC",
+                    Cuenta_Ahorros.class
+            )
+                    .setParameter("nombreSucursal", nombreSucursal)
+                    .setParameter("saldoMinimo", saldoMinimo)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Cuenta_Ahorros> buscarConTarjetaActiva() {
+
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            return em.createQuery(
+                    "SELECT c FROM Cuenta_Ahorros c "
+                    + "JOIN FETCH c.tarjeta t "
+                    + "WHERE t.activa = :activa "
+                    + "ORDER BY c.numeroCuenta ASC, c.id ASC",
+                    Cuenta_Ahorros.class
+            )
+                    .setParameter("activa", true)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Movimiento> buscarMovimientosPorPeriodo(
+            int idCuenta,
+            LocalDateTime desde,
+            LocalDateTime hastaExclusiva) {
+
+        if (desde == null || hastaExclusiva == null
+                || !desde.isBefore(hastaExclusiva)) {
+            throw new IllegalArgumentException(
+                    "La fecha inicial debe ser anterior a la fecha final.");
+        }
+
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            return em.createQuery(
+                    "SELECT m FROM Movimiento m "
+                    + "JOIN FETCH m.cuenta c "
+                    + "WHERE c.id = :idCuenta "
+                    + "AND m.fecha >= :desde "
+                    + "AND m.fecha < :hasta "
+                    + "ORDER BY m.fecha DESC, m.idMovimiento DESC",
+                    Movimiento.class
+            )
+                    .setParameter("idCuenta", idCuenta)
+                    .setParameter("desde", desde)
+                    .setParameter("hasta", hastaExclusiva)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Cuenta_Ahorros> listarPaginado(int numeroPagina) {
+
+        if (numeroPagina < 1) {
+            throw new IllegalArgumentException(
+                    "El número de página debe ser mayor o igual a 1.");
+        }
+
+        int registrosPorPagina = 5;
+        int inicio = Math.multiplyExact(
+                numeroPagina - 1, registrosPorPagina);
+
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            return em.createQuery(
+                    "SELECT c FROM Cuenta_Ahorros c "
+                    + "LEFT JOIN FETCH c.cliente cl "
+                    + "ORDER BY cl.nombre ASC, c.id ASC",
+                    Cuenta_Ahorros.class
+            )
+                    .setFirstResult(inicio)
+                    .setMaxResults(registrosPorPagina)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
 }

@@ -6,7 +6,8 @@ package com.mycompany.act1_cuentaahorros.entity;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
-import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -14,7 +15,6 @@ import lombok.*;
  */
 @Entity
 @Table(name = "cuentaAhorros")
-@NoArgsConstructor
 public class Cuenta_Ahorros implements Serializable {
 
     @Id
@@ -30,6 +30,18 @@ public class Cuenta_Ahorros implements Serializable {
 
     @Column(name = "saldoCuenta", nullable = false)
     private Double saldo;
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
+    @ManyToOne
+    @JoinColumn(name = "sucursal_id")
+    private Sucursal sucursal;
+    @OneToMany(mappedBy = "cuenta")
+    private List<Movimiento> movimientos = new ArrayList<>();
+    @OneToOne(mappedBy = "cuenta")
+    private TarjetaDebito tarjeta;
 
     public Cuenta_Ahorros(Integer numeroCuenta, String titular, Double saldo) {
         this.numeroCuenta = numeroCuenta;
@@ -73,4 +85,44 @@ public class Cuenta_Ahorros implements Serializable {
         this.saldo = saldo;
     }
 
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public Sucursal getSucursal() {
+        return sucursal;
+    }
+
+    public void setSucursal(Sucursal sucursal) {
+        this.sucursal = sucursal;
+    }
+
+    public List<Movimiento> getMovimientos() {
+        return movimientos;
+    }
+
+    public void agregarMovimiento(Movimiento movimiento) {
+        movimientos.add(movimiento);
+        movimiento.setCuenta(this);
+    }
+
+    public TarjetaDebito getTarjeta() {
+        return tarjeta;
+    }
+
+    public void setTarjeta(TarjetaDebito tarjeta) {
+        if (this.tarjeta != null) {
+            this.tarjeta.setCuenta(null);
+        }
+
+        this.tarjeta = tarjeta;
+
+        if (tarjeta != null) {
+            tarjeta.setCuenta(this);
+        }
+    }
 }
