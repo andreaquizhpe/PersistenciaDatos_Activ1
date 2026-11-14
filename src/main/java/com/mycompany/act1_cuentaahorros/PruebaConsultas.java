@@ -22,7 +22,7 @@ public class PruebaConsultas {
         System.out.println("\n=== 1. SUCURSAL Y SALDO MÍNIMO ===");
 
         List<Cuenta_Ahorros> cuentas =
-                repositorio.buscarPorSucursalYSaldo("Centro-Prueba", 300.0);
+                repositorio.buscarPorSucursalYSaldo("Centro-Sur", 300.0);
 
         for (Cuenta_Ahorros cuenta : cuentas) {
             System.out.println(
@@ -97,16 +97,16 @@ public class PruebaConsultas {
             }
 
             Cliente ana = new Cliente(
-                    "0000000001", "Ana Prueba", "ana@example.com");
+                    "0000000001", "Ana Maria Contreras", "ana@example.com");
 
             Cliente bruno = new Cliente(
-                    "0000000002", "Bruno Prueba", "bruno@example.com");
+                    "0000000002", "Bruno Diaz", "bruno@example.com");
 
             Sucursal centro = new Sucursal(
-                    "Centro-Prueba", "Dirección de prueba Centro");
+                    "Centro-Sur", "Dirección de prueba Centro");
 
             Sucursal norte = new Sucursal(
-                    "Norte-Prueba", "Dirección de prueba Norte");
+                    "Norte-B", "Dirección de prueba Norte");
 
             em.persist(ana);
             em.persist(bruno);
@@ -217,7 +217,7 @@ public class PruebaConsultas {
                     + "AND c.cliente.cedula = :cedula",
                     Integer.class
             )
-                    .setParameter("numero", 900001)
+                    .setParameter("numero", 900401)
                     .setParameter("cedula", "0000000001")
                     .getSingleResult();
 
