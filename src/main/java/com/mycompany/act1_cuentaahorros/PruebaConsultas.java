@@ -123,7 +123,7 @@ public class PruebaConsultas {
                 Sucursal sucursal = i < 5 ? centro : norte;
 
                 Cuenta_Ahorros cuenta = new Cuenta_Ahorros(
-                        900001 + i,
+                        900401 + i,
                         cliente.getNombre(),
                         saldos[i]
                 );
